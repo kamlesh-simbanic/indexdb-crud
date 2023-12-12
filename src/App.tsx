@@ -1,25 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { createContext, useEffect, useState } from "react";
+import IndexedDb from "./utils/db";
+import "./App.css";
+import UserForm from "./component/user-form";
+
+export const DBContext = createContext<{
+  indexedDb: IndexedDb | null;
+}>({
+  indexedDb: null,
+});
 
 function App() {
+  const [indexedDb, setIndexedDb] = useState<IndexedDb | null>(null);
+
+  const initializeDB = async () => {
+    let tempDb = new IndexedDb();
+    await tempDb.createObjectStore();
+    setIndexedDb(tempDb);
+  };
+
+  useEffect(() => {
+    initializeDB();
+  }, []);
+
+  if (!indexedDb?.db) return <h1>Connecting Database... </h1>;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DBContext.Provider value={{ indexedDb: indexedDb }}>
+      <div className="">
+        <div className="row col-lg-10 p-2">
+          <UserForm />
+        </div>
+      </div>
+    </DBContext.Provider>
   );
 }
 
